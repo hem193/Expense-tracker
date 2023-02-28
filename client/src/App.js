@@ -1,15 +1,14 @@
 import "./App.css";
 import { useEffect, useState } from "react";
 
-function App() {
-  const InitialForm = {
-    amount: 0,
-    description: "",
-    date: "",
-  };
+import AppBar from "./components/AppBar";
+import TransactionForm from "./components/TransactionForm";
 
-  const [form, setForm] = useState({});
-  const [transactions, setTransactions] = useState(InitialForm);
+function App() {
+  const [transactions, setTransactions] = useState([]);
+  useEffect(() => {
+    fetchTransactions();
+  }, []);
 
   async function fetchTransactions() {
     const res = await fetch("http://localhost:4000/transaction");
@@ -17,56 +16,11 @@ function App() {
     setTransactions(data);
   }
 
-  useEffect(() => {
-    fetchTransactions();
-  });
-
-  function handleInput(e) {
-    setForm({
-      ...form,
-      [e.target.name]: e.target.value,
-    });
-  }
-
-  async function handleSubmit(e) {
-    e.preventDefault();
-    const res = await fetch("http://localhost:4000/transaction", {
-      method: "POST",
-      body: JSON.stringify(form),
-      headers: {
-        "content-type": "application/json",
-      },
-    });
-    if (res.ok) {
-      setForm(InitialForm);
-      fetchTransactions();
-    }
-  }
   return (
     <div>
-      <form onSubmit={handleSubmit}>
-        <input
-          type="number"
-          name="amount"
-          value={form.amount}
-          onChange={handleInput}
-          placeholder="Enter transaction amount"
-        />
-        <input
-          type="text"
-          name="description"
-          value={form.description}
-          onChange={handleInput}
-          placeholder="Enter transaction details"
-        />
-        <input
-          type="date"
-          name="date"
-          value={form.date}
-          onChange={handleInput}
-        />
-        <button type="submit">Submit</button>
-      </form>
+      <AppBar />
+      <TransactionForm fetchTransactions={fetchTransactions} />
+
       <br />
       <section>
         <table>
