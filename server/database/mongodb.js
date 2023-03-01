@@ -12,7 +12,7 @@ async function connect() {
     .connect(
       `mongodb+srv://${username}:${passport}@${url}/Expense-tracker?retryWrites=true&w=majority`
     )
-    .then(() => console.log("MongoDB connection is successful"))
+    .then(() => console.log("MongoDB connection is successfull"))
     .catch((err) => console.error(err));
 }
 
