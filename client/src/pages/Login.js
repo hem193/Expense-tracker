@@ -12,7 +12,7 @@ import Typography from "@mui/material/Typography";
 import Container from "@mui/material/Container";
 import Cookies from "js-cookie";
 import { useDispatch } from "react-redux";
-import { getUser } from "../store/auth.js";
+import { setUser } from "../store/auth.js";
 
 export default function Login() {
   const dispatch = useDispatch();
@@ -36,7 +36,7 @@ export default function Login() {
 
     if (res.ok) {
       Cookies.set("token", token);
-      dispatch(getUser(user));
+      dispatch(setUser(user));
       navigate("/");
     }
   };

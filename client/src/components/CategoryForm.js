@@ -4,35 +4,34 @@ import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
 import Typography from "@mui/material/Typography";
 import TextField from "@mui/material/TextField";
-import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
-import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
-import { DesktopDatePicker } from "@mui/x-date-pickers/DesktopDatePicker";
+// import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
+// import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+// import { DesktopDatePicker } from "@mui/x-date-pickers/DesktopDatePicker";
 import Button from "@mui/material/Button";
 import Cookies from "js-cookie";
 import Autocomplete from "@mui/material/Autocomplete";
 import Box from "@mui/material/Box";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
+import { setUser } from "../store/auth.js";
 
 const InitialForm = {
-  amount: 0,
-  description: "",
-  date: new Date(),
-  category_id: "",
+  label: "",
+  icon: "",
 };
 
-export default function TransactionForm({
-  fetchTransactions,
-  editTransaction,
-}) {
-  const { categories } = useSelector((state) => state.auth.user);
+const icons = ["User"];
+
+export default function CategoryForm({ editCategory }) {
+  const user = useSelector((state) => state.auth.user);
+  const dispatch = useDispatch();
   const token = Cookies.get("token");
   const [form, setForm] = useState(InitialForm);
 
   useEffect(() => {
-    if (editTransaction.amount !== undefined) {
-      setForm(editTransaction);
+    if (editCategory._id !== undefined) {
+      setForm(editCategory);
     }
-  }, [editTransaction]);
+  }, [editCategory]);
 
   function handleChange(e) {
     setForm({
@@ -46,18 +45,18 @@ export default function TransactionForm({
 
   async function handleSubmit(e) {
     e.preventDefault();
-    const res = editTransaction.amount === undefined ? create() : update();
+    const res = editCategory._id === undefined ? create() : update();
   }
 
-  function reload(res) {
+  function reload(res, _user) {
     if (res.ok) {
+      dispatch(setUser({ user: _user }));
       setForm(InitialForm);
-      fetchTransactions();
     }
   }
 
   async function create() {
-    const res = await fetch(`${process.env.REACT_APP_API_URL}/transaction`, {
+    const res = await fetch(`${process.env.REACT_APP_API_URL}/category`, {
       method: "POST",
       body: JSON.stringify(form),
       headers: {
@@ -65,12 +64,16 @@ export default function TransactionForm({
         Authorization: `Bearer ${token}`,
       },
     });
-    reload(res);
+    const _user = {
+      ...user,
+      categories: [...user.categories, { ...form }],
+    };
+    reload(res, _user);
   }
 
   async function update() {
     const res = await fetch(
-      `${process.env.REACT_APP_API_URL}/transaction/${editTransaction._id}`,
+      `${process.env.REACT_APP_API_URL}/category/${editCategory._id}`,
       {
         method: "PATCH",
         body: JSON.stringify(form),
@@ -80,71 +83,60 @@ export default function TransactionForm({
         },
       }
     );
-    reload(res);
+    const _user = {
+      ...user,
+      categories: [
+        ...user.categories.map((cat) =>
+          cat._id == editCategory._id ? form : cat
+        ),
+      ],
+    };
+    reload(res, _user);
   }
 
   function getCategoryNameById() {
     return (
-      categories.find((category) => category._id === form.category_id) ?? ""
+      user.categories.find((category) => category._id === form.category_id) ??
+      ""
     );
   }
 
   return (
     <Card sx={{ minWidth: 275, marginTop: 5 }}>
       <CardContent>
-        <Typography variant="h6">Add New Transaction</Typography>
+        <Typography variant="h6">Add New Category</Typography>
         <Box component="form" onSubmit={handleSubmit} sx={{ display: "flex" }}>
           <TextField
             sx={{ marginRight: 5 }}
-            type="number"
-            name="amount"
+            type="text"
+            name="label"
             size="small"
             id="outlined-basic"
-            label="Amount"
+            label="Label"
             variant="outlined"
-            value={form.amount}
+            value={form.label}
             onChange={handleChange}
           />
-          <TextField
-            sx={{ marginRight: 5 }}
-            name="description"
-            size="small"
-            id="outlined-basic"
-            label="Description"
-            value={form.description}
-            onChange={handleChange}
-            variant="outlined"
-          />
-          <LocalizationProvider dateAdapter={AdapterDayjs}>
-            <DesktopDatePicker
-              label="Transaction Date"
-              inputFormat="MM/DD/YYYY"
-              value={form.date}
-              onChange={handleDate}
-              renderInput={(params) => (
-                <TextField sx={{ marginRight: 5 }} size="small" {...params} />
-              )}
-            />
-          </LocalizationProvider>
+
           <Autocomplete
             value={getCategoryNameById()}
             onChange={(event, newValue) => {
-              setForm({ ...form, category_id: newValue._id });
+              setForm({ ...form, icon: newValue });
             }}
-            id="controllable-states-demo"
-            options={categories}
+            id="icons"
+            options={icons}
             sx={{ width: 200, marginRight: 5 }}
             renderInput={(params) => (
-              <TextField {...params} size="small" label="Category" />
+              <TextField {...params} size="small" label="Icon" />
             )}
           />
 
-          {editTransaction.amount !== undefined && (
+          {editCategory._id !== undefined && (
             <Button type="submit" variant="contained" color="secondary">
               Update
             </Button>
           )}
-          {editTransaction.amount === undefined && (
+          {editCategory._id === undefined && (
             <Button type="submit" variant="contained">
               Submit
             </Button>
