@@ -1,12 +1,8 @@
 import { useEffect, useState } from "react";
-// import Box from "@mui/material/Box";
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
 import Typography from "@mui/material/Typography";
 import TextField from "@mui/material/TextField";
-// import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
-// import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
-// import { DesktopDatePicker } from "@mui/x-date-pickers/DesktopDatePicker";
 import Button from "@mui/material/Button";
 import Cookies from "js-cookie";
 import Autocomplete from "@mui/material/Autocomplete";
@@ -39,13 +35,13 @@ export default function CategoryForm({ editCategory }) {
       [e.target.name]: e.target.value,
     });
   }
-  function handleDate(newValue) {
-    setForm({ ...form, date: newValue });
-  }
 
   async function handleSubmit(e) {
     e.preventDefault();
     const res = editCategory._id === undefined ? create() : update();
+  }
+  function handleDate(newValue) {
+    setForm({ ...form, date: newValue });
   }
 
   function reload(res, _user) {
@@ -87,7 +83,7 @@ export default function CategoryForm({ editCategory }) {
       ...user,
       categories: [
         ...user.categories.map((cat) =>
-          cat._id == editCategory._id ? form : cat
+          cat._id === editCategory._id ? form : cat
         ),
       ],
     };
