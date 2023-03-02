@@ -3,11 +3,10 @@ import connect from "./database/mongodb.js";
 import passport from "passport";
 import cors from "cors";
 import bodyParser from "body-parser";
-import AuthApi from "./routes/AuthApi.js";
-import TransactionsApi from "./routes/TransactionsApi.js";
-import passportConfig from "./config/passport.js";
 
+import passportConfig from "./config/passport.js";
 import * as dotenv from "dotenv";
+import routes from "./routes/index.js";
 
 dotenv.config();
 const PORT = 4000;
@@ -19,11 +18,10 @@ app.use(passport.initialize());
 passportConfig(passport);
 
 app.get("/", (req, res) => {
-  res.send("Hello Hemanth be Strong");
+  res.send("Hello World");
 });
 
-app.use("/transaction", TransactionsApi);
-app.use("/auth", AuthApi);
+app.use("/", routes);
 
 await connect();
 
